@@ -255,7 +255,7 @@ public class AESUtil {
 
 1. Получить сервис TTL_SERVICE
 2. Получить характеристики TTL_READ и TTL_WRITE этого сервиса (см. [Доступные Сервисы](#доступные-сервисы)). TTL_WRITE будет использоваться для записи сообщений, TTL_READ - для чтения
-3. Включить уведомления для характеристики (см. код ниже)
+3. Включить уведомления для характеристики TTL_READ (см. код ниже)
 
 Пример кода на java для включения уведомления:
 ```java
@@ -264,6 +264,8 @@ BluetoothLeService.UUID_HEART_RATE_MEASUREMENT = UUID.fromString("00002902-0000-
 if(characteristic.getUuid().toString().equals(BluetoothLeService.UUID_READ)) {
     bluetoothGatt.setCharacteristicNotification(characteristic, true);
     BluetoothGattDescriptor heartRateDescriptor = characteristic.getDescriptor(BluetoothLeService.UUID_HEART_RATE_MEASUREMENT);
+    
+    // public static final byte[] ENABLE_NOTIFICATION_VALUE = {0x01, 0x00}; - http://androidxref.com/7.1.2_r36/xref/frameworks/base/core/java/android/bluetooth/BluetoothGattDescriptor.java#36
     heartRateDescriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
 
     if(bluetoothGatt.writeDescriptor(heartRateDescriptor)) {
