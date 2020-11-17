@@ -13,6 +13,7 @@
     + [Шифрование поля data](#шифрование-поля-data)
     + [Формат ответа](#формат-ответа)
   * [Работа с замком](#работа-с-замком)
+    + 
     + [Инициализация замка](#инициализация-замка)
       - [1. COMM_INITIALIZE](#1-comm_initialize)
         * [Пример команды:](#пример-команды)
@@ -246,7 +247,32 @@ public class AESUtil {
 
 ## Работа с замком
 
-Мы знаем, как генерировать и отправлять команды замку, и как получать от замка ответы. Теперь мы можем разобраться в управлении замком.
+Мы знаем, как генерировать команды и разбирать ответы. Теперь мы можем разобраться в управлении замком.
+
+### Подключение к замку
+
+После установления соединения с замком, необходимо его настроить. Алгоритм следующий:
+
+1. Получить сервис TTL_SERVICE
+2. Получить характеристики TTL_READ и TTL_WRITE этого сервиса (см. [Доступные Сервисы](#доступные-сервисы)). TTL_WRITE будет использоваться для записи сообщений, TTL_READ - для чтения
+3. Включить уведомления для характеристики (см. код ниже)
+
+Пример кода на java для включения уведомления:
+```java
+BluetoothLeService.UUID_HEART_RATE_MEASUREMENT = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
+
+if(characteristic.getUuid().toString().equals(BluetoothLeService.UUID_READ)) {
+    bluetoothGatt.setCharacteristicNotification(characteristic, true);
+    BluetoothGattDescriptor heartRateDescriptor = characteristic.getDescriptor(BluetoothLeService.UUID_HEART_RATE_MEASUREMENT);
+    heartRateDescriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+
+    if(bluetoothGatt.writeDescriptor(heartRateDescriptor)) {
+        LogUtil.d("writeDescriptor successed", true);
+    } else {
+        LogUtil.d("writeDescriptor failed", true);
+    }
+}
+```
 
 ### Инициализация замка
 
