@@ -328,13 +328,13 @@ if(characteristic.getUuid().toString().equals(BluetoothLeService.UUID_READ)) {
 * Код: `0x56`
 * Параметры:
     - `adminPassword`
-    - `unlockNumber`
+    - `unlockKey`
     - вендор (строка `"SCIENER"`)
 
-`adminPassword` и `unlockNumber` - случайно сгенерированные 10-значные пароли:
+`adminPassword` и `unlockKey` - случайно сгенерированные 10-значные пароли:
 
 ```java
-String adminPs = new String(DigitUtil.generateDynamicPassword(10));
+String adminPassword = new String(DigitUtil.generateDynamicPassword(10));
 String unlockKey = new String(DigitUtil.generateDynamicPassword(10));
 ```
 
@@ -358,12 +358,12 @@ public static byte[] generateDynamicPassword(int length) {
 }
 ```
 
-##### Упаковка данных в `data`:
+##### Формирование команды:
 
 ```java
 byte[] data = new byte[15];
 byte[] adminPasswd = DigitUtil.integerToByteArray(Integer.valueOf(adminKey).intValue());
-byte[] unlockCode = DigitUtil.integerToByteArray(Integer.valueOf(unlockPass).intValue());
+byte[] unlockCode = DigitUtil.integerToByteArray(Integer.valueOf(unlockKey).intValue());
 System.arraycopy(((Object)adminPasswd), 0, ((Object)data), 0, adminPasswd.length);
 System.arraycopy(((Object)unlockCode), 0, ((Object)data), 4, unlockCode.length);
 System.arraycopy("SCIENER".getBytes(), 0, ((Object)data), 8, 7);
@@ -384,7 +384,7 @@ public static byte[] integerToByteArray(int integer) {
 }
 ```
 
-Например, у нас сгенерировались `adminPasswd` = "0970456745" и `unlockCode` = "0344382141". Тогда после конвертации они будут иметь вид `[0x39,0xd7,0xfe,0xa9]` и `[0x14,0x86,0xda,0xbd]` соответственно. Эти массивы байт нужно склеить вместе, и добавить к ним строку "SCIENER" - и мы получим готовое поле `data`.
+Например, у нас сгенерировались `adminPassword` = "0970456745" и `unlockKey` = "0344382141". Тогда после конвертации они будут иметь вид `[0x39,0xd7,0xfe,0xa9]` и `[0x14,0x86,0xda,0xbd]` соответственно. Эти массивы байт нужно склеить вместе, и добавить к ним строку "SCIENER" - и мы получим готовое поле `data`.
 
 Тогда поле `data` целиком будет иметь вид `[0x39,0xd7,0xfe,0xa9,0x14,0x86,0xda,0xbd,0x53,0x43,0x49,0x45,0x4e,0x45,0x52]`
 
@@ -504,7 +504,101 @@ public static byte[] convertTimeToByteArray(String timeStr) {
 * `0x01` - статус (success)
 * `[0x00,0x00,0xce,0x2b]` - сеансовый пароль замка
 
+Сеансовый пароль испольузется в следующей команде. Каждый раз замок присылает новый сеансовый пароль, чтобы его нельзя было заблокировать или разблокировать, отправив повторно одну и ту же команду.
+
 #### 2. COMM_FUNCTION_LOCK
 
 * Код: `0x58`
-* Параметры: 
+* Параметры:
+  - `unlockKey`
+  - сеансовый пароль замка
+  - unlockDate
+
+##### Формирование команды
+
+Перед шифрованием поле `data` имеет следующий формат: 
+
+|Размер|Параметр|Примечание|
+|-|-|-|
+|4 байта|Код разблокировки|Генерируется из unlockKey и сеансового пароля замка, алгоритм описан ниже|
+|4 байта|unlockDate|текущая метка времени (?), формат описан ниже|
+
+Первые 4 байта - код разблокировки, алгоритм его генерации описан ниже.
+
+Вторые 4 байта - `unlockDate`, некая метка времени. Я не смог понять из кода, какая именно метка здесь используется. Скорее всего, достаточно отправить текущую. 
+
+###### Генерация кода разблокировки
+
+Код разблокировки генерируется из `unlockKey` и сеансового пароля замка. `unlockKey` мы сгенерировали при инициализации замка [на шаге 3](#3-comm_add_admin). Сеансовый пароль мы получили от замка [на предыдущем шаге](#1-comm_check_admin). Код разблокировки генерируется так:
+
+TL;DR: сеансовый пароль конвертируется в число, складывается с `unlockKey`, результат превращается в массив байт.
+
+```java
+String lockPwd = DigitUtil.getUnlockPwd_new(DigitUtil.fourBytesToLong(psFromLock), Long.valueOf(unlockKey).longValue());
+byte[] lockPwdArr = DigitUtil.integerToByteArray(Integer.valueOf(lockPwd).intValue());
+```
+
+Функция `integerToByteArray` приведена [здесь](#конвертация-паролей-в-массив-байт).
+
+Функции `getUnlockPwd_new` и `fourBytesToLong` приведены ниже:
+
+```java
+public static String getUnlockPwd_new(long arg0, long arg2) {
+    return String.valueOf(((int)(arg0 + arg2)));
+}
+
+public static long fourBytesToLong(byte[] arg5) {
+    long res = ((long)(arg5[0] << 24)) & 0xFF000000L | 0L | ((long)(arg5[1] << 16 & 0xFF0000)) | ((long)(arg5[2] << 8 & 0xFF00)) | ((long)(arg5[3] & 0xFF));
+    return res;
+}
+```
+
+**Пример:** Допустим, мы сгенерировали `unlockKey` = "0344382141", и замок прислал нам сеансовый пароль = `[0x00,0x00,0xce,0x2b]`.
+
+После преобразования в число с помощью `fourBytesToLong` получим сеансовый пароль = 52779.
+
+После этого мы складываем 344382141 + 52779 и получаем 344434920.
+
+Затем конвертируем 344434920 в массив байт с помощью `integerToByteArray`, и получаем `[0x14,0x87,0xa8,0xe8]`.
+
+Это и будут первые 4 байта поля data.
+
+###### Генерация метки времени
+
+Следующие 4 байта поля `data` - метка времени. Как её получить:
+* Взять количество секунд с Epoch (в java - `System.currentTimeMillis() / 1000`, в python - `int(time.time())`). 
+* Сконвертировать в массив байт, функцией `integerToByteArray` (функция описана [здесь](#конвертация-паролей-в-массив-байт))
+
+Допустим, у нас была метка времени 1605113559. Тогда после преобразования у нас получится массив байт `[0x5f,0xac,0x16,0xd7]` - это следующие 4 байта поля `data`.
+
+В итоге, поле `data` будет иметь вид `[0x14,0x87,0xa8,0xe8,0x5f,0xac,0x16,0xd7]`
+
+После шифрования сеансовым AES ключом получим поле `data` вида `[0xc9,0x81,0x3d,0xe3,0xda,0x71,0x7f,0x2a,0xe9,0x4d,0x7a,0xf4,0xf8,0xa2,0x4d,0x2a,0xd,0xa]`
+
+##### Пример команды
+
+`[0x7f,0x5a,0x05,0x03,0x07,0x00,0x01,0x00,0x01,0x58,0xaa,0x10,0xc9,0x81,0x3d,0xe3,0xda,0x71,0x7f,0x2a,0xe9,0x4d,0x7a,0xf4,0xf8,0xa2,0x4d,0x2a,0x6e,0xd,0xa]`
+
+##### Пример ответа
+
+`[0x7f,0x5a,0x05,0x03,0x07,0x00,0x01,0x00,0x01,0x54,0xaa,0x20,0xd9,0x5e,0x73,0xe0,0x46,0x1f,0x88,0x68,0x32,0xeb,0x31,0x29,0x43,0xc3,0x09,0x15,0x09,0x15,0x3d,0x3a,0x0c,0xb2,0x67,0x84,0x1c,0x63,0xfe,0xf3,0x18,0x55,0xa7,0x4b,0xf0,0xd,0xa]`
+
+Поле `data` после расшифрования сеансоывым AES ключом будет иметь вид:
+
+`[0x58,0x01,0x64,0x00,0x42,0xcb,0x6e,0x5f,0xac,0x16,0xd7,0x14,0x0b,0x0b,0x13,0x34,0x39]`, где:
+
+|offset|размер|значение|описание|
+|-|-|-|-|
+|0|1 байт|`0x58`|код команды|
+|1|1 байт|`0x01`|статус (success)|
+|2|1 байт|`0x64`|заряд батареи в процентах|
+|3|4 байта|`[0x00,0x42,0xcb,0x6e]`|не используется|
+|7|4 байта|`[0x5f,0xac,0x16,0xd7]`|`uniqueId` - приложение отправляет это на сервер, в остальном не используется|
+|11|1 байт|`0x14`|последние 2 цифры года|
+|12|1 байт|`0x0b`|№ месяца (`0x0b` = 11 = ноябрь)|
+|13|1 байт|`0x0b`|число месяца|
+|14|1 байт|`0x13`|часы|
+|15|1 байт|`0x34`|минуты|
+|16|1 байт|`0x39`|секунды|
+
+Начиная с 11 байта в ответе лежит метка времени. Её стоит запомнить и использовать в команде для разблокировки замка.
