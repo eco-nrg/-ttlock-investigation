@@ -7,48 +7,51 @@
 <!-- MarkdownTOC autolink="true" -->
 
 - [Описание протокола умных замков TTLock](#%D0%9E%D0%BF%D0%B8%D1%81%D0%B0%D0%BD%D0%B8%D0%B5-%D0%BF%D1%80%D0%BE%D1%82%D0%BE%D0%BA%D0%BE%D0%BB%D0%B0-%D1%83%D0%BC%D0%BD%D1%8B%D1%85-%D0%B7%D0%B0%D0%BC%D0%BA%D0%BE%D0%B2-ttlock)
-    - [Немного теории](#%D0%9D%D0%B5%D0%BC%D0%BD%D0%BE%D0%B3%D0%BE-%D1%82%D0%B5%D0%BE%D1%80%D0%B8%D0%B8)
-    - [Доступные Сервисы](#%D0%94%D0%BE%D1%81%D1%82%D1%83%D0%BF%D0%BD%D1%8B%D0%B5-%D0%A1%D0%B5%D1%80%D0%B2%D0%B8%D1%81%D1%8B)
-    - [Формат сообщений](#%D0%A4%D0%BE%D1%80%D0%BC%D0%B0%D1%82-%D1%81%D0%BE%D0%BE%D0%B1%D1%89%D0%B5%D0%BD%D0%B8%D0%B9)
-    - [Список кодов команд](#%D0%A1%D0%BF%D0%B8%D1%81%D0%BE%D0%BA-%D0%BA%D0%BE%D0%B4%D0%BE%D0%B2-%D0%BA%D0%BE%D0%BC%D0%B0%D0%BD%D0%B4)
-    - [Вычисление DS CRC8](#%D0%92%D1%8B%D1%87%D0%B8%D1%81%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5-ds-crc8)
-    - [Шифрование поля data](#%D0%A8%D0%B8%D1%84%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5-%D0%BF%D0%BE%D0%BB%D1%8F-data)
-    - [Формат ответа](#%D0%A4%D0%BE%D1%80%D0%BC%D0%B0%D1%82-%D0%BE%D1%82%D0%B2%D0%B5%D1%82%D0%B0)
+  - [Немного теории](#%D0%9D%D0%B5%D0%BC%D0%BD%D0%BE%D0%B3%D0%BE-%D1%82%D0%B5%D0%BE%D1%80%D0%B8%D0%B8)
+  - [Доступные Сервисы](#%D0%94%D0%BE%D1%81%D1%82%D1%83%D0%BF%D0%BD%D1%8B%D0%B5-%D0%A1%D0%B5%D1%80%D0%B2%D0%B8%D1%81%D1%8B)
+  - [Формат сообщений](#%D0%A4%D0%BE%D1%80%D0%BC%D0%B0%D1%82-%D1%81%D0%BE%D0%BE%D0%B1%D1%89%D0%B5%D0%BD%D0%B8%D0%B9)
+  - [Список кодов команд](#%D0%A1%D0%BF%D0%B8%D1%81%D0%BE%D0%BA-%D0%BA%D0%BE%D0%B4%D0%BE%D0%B2-%D0%BA%D0%BE%D0%BC%D0%B0%D0%BD%D0%B4)
+  - [Вычисление DS CRC8](#%D0%92%D1%8B%D1%87%D0%B8%D1%81%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5-ds-crc8)
+  - [Шифрование поля data](#%D0%A8%D0%B8%D1%84%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5-%D0%BF%D0%BE%D0%BB%D1%8F-data)
+  - [Формат ответа](#%D0%A4%D0%BE%D1%80%D0%BC%D0%B0%D1%82-%D0%BE%D1%82%D0%B2%D0%B5%D1%82%D0%B0)
 - [Работа с замком](#%D0%A0%D0%B0%D0%B1%D0%BE%D1%82%D0%B0-%D1%81-%D0%B7%D0%B0%D0%BC%D0%BA%D0%BE%D0%BC)
-    - [Подключение к замку](#%D0%9F%D0%BE%D0%B4%D0%BA%D0%BB%D1%8E%D1%87%D0%B5%D0%BD%D0%B8%D0%B5-%D0%BA-%D0%B7%D0%B0%D0%BC%D0%BA%D1%83)
-    - [Инициализация замка](#%D0%98%D0%BD%D0%B8%D1%86%D0%B8%D0%B0%D0%BB%D0%B8%D0%B7%D0%B0%D1%86%D0%B8%D1%8F-%D0%B7%D0%B0%D0%BC%D0%BA%D0%B0)
-        - [1. COMM_INITIALIZE](#1-comm_initialize)
-            - [Формат ответа](#%D0%A4%D0%BE%D1%80%D0%BC%D0%B0%D1%82-%D0%BE%D1%82%D0%B2%D0%B5%D1%82%D0%B0-1)
-        - [2. COMM_GET_AES_KEY](#2-comm_get_aes_key)
-            - [Формат ответа](#%D0%A4%D0%BE%D1%80%D0%BC%D0%B0%D1%82-%D0%BE%D1%82%D0%B2%D0%B5%D1%82%D0%B0-2)
-        - [3. COMM_ADD_ADMIN](#3-comm_add_admin)
-            - [Код для генерации паролей:](#%D0%9A%D0%BE%D0%B4-%D0%B4%D0%BB%D1%8F-%D0%B3%D0%B5%D0%BD%D0%B5%D1%80%D0%B0%D1%86%D0%B8%D0%B8-%D0%BF%D0%B0%D1%80%D0%BE%D0%BB%D0%B5%D0%B9)
-            - [Формирование команды:](#%D0%A4%D0%BE%D1%80%D0%BC%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5-%D0%BA%D0%BE%D0%BC%D0%B0%D0%BD%D0%B4%D1%8B)
-            - [Конвертация паролей в массив байт:](#%D0%9A%D0%BE%D0%BD%D0%B2%D0%B5%D1%80%D1%82%D0%B0%D1%86%D0%B8%D1%8F-%D0%BF%D0%B0%D1%80%D0%BE%D0%BB%D0%B5%D0%B9-%D0%B2-%D0%BC%D0%B0%D1%81%D1%81%D0%B8%D0%B2-%D0%B1%D0%B0%D0%B9%D1%82)
-            - [Формат ответа](#%D0%A4%D0%BE%D1%80%D0%BC%D0%B0%D1%82-%D0%BE%D1%82%D0%B2%D0%B5%D1%82%D0%B0-3)
-        - [4. COMM_TIME_CALIBRATE](#4-comm_time_calibrate)
-            - [Преобразование даты и времени](#%D0%9F%D1%80%D0%B5%D0%BE%D0%B1%D1%80%D0%B0%D0%B7%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5-%D0%B4%D0%B0%D1%82%D1%8B-%D0%B8-%D0%B2%D1%80%D0%B5%D0%BC%D0%B5%D0%BD%D0%B8)
-            - [Формат ответа](#%D0%A4%D0%BE%D1%80%D0%BC%D0%B0%D1%82-%D0%BE%D1%82%D0%B2%D0%B5%D1%82%D0%B0-4)
-        - [5. COMM_CHECK_USER_TIME](#5-comm_check_user_time)
-            - [Формирование команды](#%D0%A4%D0%BE%D1%80%D0%BC%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5-%D0%BA%D0%BE%D0%BC%D0%B0%D0%BD%D0%B4%D1%8B-1)
-            - [Формат ответа:](#%D0%A4%D0%BE%D1%80%D0%BC%D0%B0%D1%82-%D0%BE%D1%82%D0%B2%D0%B5%D1%82%D0%B0-5)
-        - [To be continued...](#to-be-continued)
-    - [Поднятие замка](#%D0%9F%D0%BE%D0%B4%D0%BD%D1%8F%D1%82%D0%B8%D0%B5-%D0%B7%D0%B0%D0%BC%D0%BA%D0%B0)
-        - [1. COMM_CHECK_ADMIN](#1-comm_check_admin)
-            - [Формирование команды](#%D0%A4%D0%BE%D1%80%D0%BC%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5-%D0%BA%D0%BE%D0%BC%D0%B0%D0%BD%D0%B4%D1%8B-2)
-            - [Формат ответа](#%D0%A4%D0%BE%D1%80%D0%BC%D0%B0%D1%82-%D0%BE%D1%82%D0%B2%D0%B5%D1%82%D0%B0-6)
-        - [2. COMM_FUNCTION_LOCK](#2-comm_function_lock)
-            - [Формирование команды](#%D0%A4%D0%BE%D1%80%D0%BC%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5-%D0%BA%D0%BE%D0%BC%D0%B0%D0%BD%D0%B4%D1%8B-3)
-                - [Генерация кода разблокировки](#%D0%93%D0%B5%D0%BD%D0%B5%D1%80%D0%B0%D1%86%D0%B8%D1%8F-%D0%BA%D0%BE%D0%B4%D0%B0-%D1%80%D0%B0%D0%B7%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B8)
-                - [Генерация метки времени](#%D0%93%D0%B5%D0%BD%D0%B5%D1%80%D0%B0%D1%86%D0%B8%D1%8F-%D0%BC%D0%B5%D1%82%D0%BA%D0%B8-%D0%B2%D1%80%D0%B5%D0%BC%D0%B5%D0%BD%D0%B8)
-            - [Формат ответа](#%D0%A4%D0%BE%D1%80%D0%BC%D0%B0%D1%82-%D0%BE%D1%82%D0%B2%D0%B5%D1%82%D0%B0-7)
-                - [Первый ответ](#%D0%9F%D0%B5%D1%80%D0%B2%D1%8B%D0%B9-%D0%BE%D1%82%D0%B2%D0%B5%D1%82)
-                - [Второй ответ](#%D0%92%D1%82%D0%BE%D1%80%D0%BE%D0%B9-%D0%BE%D1%82%D0%B2%D0%B5%D1%82)
-    - [Опускание замка](#%D0%9E%D0%BF%D1%83%D1%81%D0%BA%D0%B0%D0%BD%D0%B8%D0%B5-%D0%B7%D0%B0%D0%BC%D0%BA%D0%B0)
-        - [1. COMM_CHECK_ADMIN](#1-comm_check_admin-1)
-        - [2. COMM_UNLOCK](#2-comm_unlock)
-            - [Формирование команды](#%D0%A4%D0%BE%D1%80%D0%BC%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5-%D0%BA%D0%BE%D0%BC%D0%B0%D0%BD%D0%B4%D1%8B-4)
-            - [Формат ответа](#%D0%A4%D0%BE%D1%80%D0%BC%D0%B0%D1%82-%D0%BE%D1%82%D0%B2%D0%B5%D1%82%D0%B0-8)
+  - [Подключение к замку](#%D0%9F%D0%BE%D0%B4%D0%BA%D0%BB%D1%8E%D1%87%D0%B5%D0%BD%D0%B8%D0%B5-%D0%BA-%D0%B7%D0%B0%D0%BC%D0%BA%D1%83)
+  - [Инициализация замка](#%D0%98%D0%BD%D0%B8%D1%86%D0%B8%D0%B0%D0%BB%D0%B8%D0%B7%D0%B0%D1%86%D0%B8%D1%8F-%D0%B7%D0%B0%D0%BC%D0%BA%D0%B0)
+    - [1. COMM_INITIALIZE](#1-comm_initialize)
+      - [Формат ответа](#%D0%A4%D0%BE%D1%80%D0%BC%D0%B0%D1%82-%D0%BE%D1%82%D0%B2%D0%B5%D1%82%D0%B0-1)
+    - [2. COMM_GET_AES_KEY](#2-comm_get_aes_key)
+      - [Формат ответа](#%D0%A4%D0%BE%D1%80%D0%BC%D0%B0%D1%82-%D0%BE%D1%82%D0%B2%D0%B5%D1%82%D0%B0-2)
+    - [3. COMM_ADD_ADMIN](#3-comm_add_admin)
+      - [Код для генерации паролей:](#%D0%9A%D0%BE%D0%B4-%D0%B4%D0%BB%D1%8F-%D0%B3%D0%B5%D0%BD%D0%B5%D1%80%D0%B0%D1%86%D0%B8%D0%B8-%D0%BF%D0%B0%D1%80%D0%BE%D0%BB%D0%B5%D0%B9)
+      - [Формирование команды:](#%D0%A4%D0%BE%D1%80%D0%BC%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5-%D0%BA%D0%BE%D0%BC%D0%B0%D0%BD%D0%B4%D1%8B)
+      - [Конвертация паролей в массив байт:](#%D0%9A%D0%BE%D0%BD%D0%B2%D0%B5%D1%80%D1%82%D0%B0%D1%86%D0%B8%D1%8F-%D0%BF%D0%B0%D1%80%D0%BE%D0%BB%D0%B5%D0%B9-%D0%B2-%D0%BC%D0%B0%D1%81%D1%81%D0%B8%D0%B2-%D0%B1%D0%B0%D0%B9%D1%82)
+      - [Формат ответа](#%D0%A4%D0%BE%D1%80%D0%BC%D0%B0%D1%82-%D0%BE%D1%82%D0%B2%D0%B5%D1%82%D0%B0-3)
+    - [4. COMM_TIME_CALIBRATE](#4-comm_time_calibrate)
+      - [Преобразование даты и времени](#%D0%9F%D1%80%D0%B5%D0%BE%D0%B1%D1%80%D0%B0%D0%B7%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5-%D0%B4%D0%B0%D1%82%D1%8B-%D0%B8-%D0%B2%D1%80%D0%B5%D0%BC%D0%B5%D0%BD%D0%B8)
+      - [Формат ответа](#%D0%A4%D0%BE%D1%80%D0%BC%D0%B0%D1%82-%D0%BE%D1%82%D0%B2%D0%B5%D1%82%D0%B0-4)
+    - [5. COMM_CHECK_USER_TIME](#5-comm_check_user_time)
+      - [Формирование команды](#%D0%A4%D0%BE%D1%80%D0%BC%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5-%D0%BA%D0%BE%D0%BC%D0%B0%D0%BD%D0%B4%D1%8B-1)
+      - [Формат ответа](#%D0%A4%D0%BE%D1%80%D0%BC%D0%B0%D1%82-%D0%BE%D1%82%D0%B2%D0%B5%D1%82%D0%B0-5)
+    - [6. COMM_CHECK_RANDOM](#6-comm_check_random)
+      - [Формирование команды](#%D0%A4%D0%BE%D1%80%D0%BC%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5-%D0%BA%D0%BE%D0%BC%D0%B0%D0%BD%D0%B4%D1%8B-2)
+        - [Генерация кода разблокировки](#%D0%93%D0%B5%D0%BD%D0%B5%D1%80%D0%B0%D1%86%D0%B8%D1%8F-%D0%BA%D0%BE%D0%B4%D0%B0-%D1%80%D0%B0%D0%B7%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B8)
+      - [Формат ответа](#%D0%A4%D0%BE%D1%80%D0%BC%D0%B0%D1%82-%D0%BE%D1%82%D0%B2%D0%B5%D1%82%D0%B0-6)
+    - [To be continued...](#to-be-continued)
+  - [Поднятие замка](#%D0%9F%D0%BE%D0%B4%D0%BD%D1%8F%D1%82%D0%B8%D0%B5-%D0%B7%D0%B0%D0%BC%D0%BA%D0%B0)
+    - [1. COMM_CHECK_ADMIN](#1-comm_check_admin)
+      - [Формирование команды](#%D0%A4%D0%BE%D1%80%D0%BC%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5-%D0%BA%D0%BE%D0%BC%D0%B0%D0%BD%D0%B4%D1%8B-3)
+      - [Формат ответа](#%D0%A4%D0%BE%D1%80%D0%BC%D0%B0%D1%82-%D0%BE%D1%82%D0%B2%D0%B5%D1%82%D0%B0-7)
+    - [2. COMM_FUNCTION_LOCK](#2-comm_function_lock)
+      - [Формирование команды](#%D0%A4%D0%BE%D1%80%D0%BC%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5-%D0%BA%D0%BE%D0%BC%D0%B0%D0%BD%D0%B4%D1%8B-4)
+        - [Генерация метки времени](#%D0%93%D0%B5%D0%BD%D0%B5%D1%80%D0%B0%D1%86%D0%B8%D1%8F-%D0%BC%D0%B5%D1%82%D0%BA%D0%B8-%D0%B2%D1%80%D0%B5%D0%BC%D0%B5%D0%BD%D0%B8)
+      - [Формат ответа](#%D0%A4%D0%BE%D1%80%D0%BC%D0%B0%D1%82-%D0%BE%D1%82%D0%B2%D0%B5%D1%82%D0%B0-8)
+        - [Первый ответ](#%D0%9F%D0%B5%D1%80%D0%B2%D1%8B%D0%B9-%D0%BE%D1%82%D0%B2%D0%B5%D1%82)
+        - [Второй ответ](#%D0%92%D1%82%D0%BE%D1%80%D0%BE%D0%B9-%D0%BE%D1%82%D0%B2%D0%B5%D1%82)
+  - [Опускание замка](#%D0%9E%D0%BF%D1%83%D1%81%D0%BA%D0%B0%D0%BD%D0%B8%D0%B5-%D0%B7%D0%B0%D0%BC%D0%BA%D0%B0)
+    - [1. COMM_CHECK_ADMIN](#1-comm_check_admin-1)
+    - [2. COMM_UNLOCK](#2-comm_unlock)
+      - [Формирование команды](#%D0%A4%D0%BE%D1%80%D0%BC%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5-%D0%BA%D0%BE%D0%BC%D0%B0%D0%BD%D0%B4%D1%8B-5)
+      - [Формат ответа](#%D0%A4%D0%BE%D1%80%D0%BC%D0%B0%D1%82-%D0%BE%D1%82%D0%B2%D0%B5%D1%82%D0%B0-9)
 
 <!-- /MarkdownTOC -->
 
@@ -525,7 +528,7 @@ UID - некоторое число. Оно преобразуется в мас
 **Пример итоговой команды:**
 `[0x7f,0x5a,0x05,0x03,0x07,0x00,0x01,0x00,0x01,0x55,0xaa,0x20,0x57,0x49,0xc9,0x72,0xd5,0x75,0x15,0x6b,0x85,0x50,0xc1,0x53,0x41,0xcc,0xd8,0x03,0xa3,0x55,0x1e,0x09,0x93,0x75,0x5e,0xba,0xa1,0xd0,0x82,0x8e,0xc0,0x34,0xbc,0x64,0x76,0xd,0xa]`
 
-##### Формат ответа:
+##### Формат ответа
 
 **Пример ответа от замка:**
 `[0x7f,0x5a,0x05,0x03,0x07,0x00,0x01,0x00,0x01,0x54,0xaa,0x10,0x22,0x65,0x3f,0x6f,0xf5,0xdc,0x15,0x47,0x95,0xe5,0x5f,0x72,0x82,0xd4,0xac,0x2e,0xf2,0xd,0xa]`
@@ -537,6 +540,75 @@ UID - некоторое число. Оно преобразуется в мас
 * `0x55` - код команды
 * `0x01` - статус (success)
 * `[0x00,0x00,0xb7,0x01]` - сеансовый пароль ключа. Видимо, он используется в следующих командах, стоит его сохранить.
+
+#### 6. COMM_CHECK_RANDOM
+
+* Код: `0x48`
+* Параметры:
+  - `unlockKey`
+  - сеансовый пароль замка
+
+##### Формирование команды
+
+Перед шифрованием поле `data` имеет следующий формат: 
+
+|Размер|Параметр|Примечание|
+|-|-|-|
+|4 байта|Код разблокировки|Генерируется из `unlockKey` и сеансового пароля замка, алгоритм описан ниже|
+
+###### Генерация кода разблокировки
+
+Код разблокировки генерируется из `unlockKey` и сеансового пароля замка. `unlockKey` мы сгенерировали при инициализации замка [на шаге 3](#3-comm_add_admin). Сеансовый пароль мы получили от замка [на предыдущем шаге](#5-comm_check_user_time). Код разблокировки генерируется так:
+
+TL;DR: сеансовый пароль конвертируется в число, складывается с `unlockKey`, результат превращается в массив байт.
+
+```java
+String lockPwd = DigitUtil.getUnlockPwd_new(DigitUtil.fourBytesToLong(psFromLock), Long.valueOf(unlockKey).longValue());
+byte[] lockPwdArr = DigitUtil.integerToByteArray(Integer.valueOf(lockPwd).intValue());
+```
+
+Функция `integerToByteArray` приведена [здесь](#конвертация-паролей-в-массив-байт).
+
+Функции `getUnlockPwd_new` и `fourBytesToLong` приведены ниже:
+
+```java
+public static String getUnlockPwd_new(long arg0, long arg2) {
+    return String.valueOf(((int)(arg0 + arg2)));
+}
+
+public static long fourBytesToLong(byte[] arg5) {
+    long res = ((long)(arg5[0] << 24)) & 0xFF000000L | 0L | ((long)(arg5[1] << 16 & 0xFF0000)) | ((long)(arg5[2] << 8 & 0xFF00)) | ((long)(arg5[3] & 0xFF));
+    return res;
+}
+```
+
+**Пример:** Допустим, мы сгенерировали `unlockKey` = "0344382141", и замок прислал нам сеансовый пароль = `[0x00,0x00,0xb7,0x01]`.
+
+После преобразования в число с помощью `fourBytesToLong` получим сеансовый пароль = 46849.
+
+После этого мы складываем 344382141 + 46849 и получаем 344428990.
+
+Затем конвертируем 344428990 в массив байт с помощью `integerToByteArray`, и получаем `[0x14,0x87,0x91,0xbe]`.
+
+В итоге, `data` будет такой: `[0x14,0x87,0x91,0xbe]`
+
+После шифрования сеансовым AES ключом получим такое поле `data`: `[0x30,0xfa,0x81,0x65,0xe9,0xbd,0x4a,0x50,0x02,0x2c,0x38,0x15,0x52,0x0b,0x0c,0xc3]`
+
+**Пример итогвой команды:**
+`[0x7f,0x5a,0x05,0x03,0x07,0x00,0x01,0x00,0x01,0x30,0xaa,0x10,0x30,0xfa,0x81,0x65,0xe9,0xbd,0x4a,0x50,0x02,0x2c,0x38,0x15,0x52,0x0b,0x0c,0xc3,0x52,0xd,0xa]`
+
+##### Формат ответа
+
+**Пример ответа от замка:**
+`[0x7f,0x5a,0x05,0x03,0x07,0x00,0x01,0x00,0x01,0x54,0xaa,0x10,0x7e,0x1d,0x53,0x3d,0x8c,0x07,0x94,0xcb,0x02,0x5d,0x83,0x47,0xfa,0xf0,0xbb,0xdb,0x66,0xd,0xa]`
+
+Поле `data` после расшифрования сеансоывым AES ключом будет иметь вид:
+
+`[0x30,0x01,0x64]`, где:
+
+* `0x30` - код команды
+* `0x01` - статус (success)
+* `0x64` - уровень заряда батареи, в процентах
 
 #### To be continued...
 
@@ -607,38 +679,10 @@ UID - некоторое число. Оно преобразуется в мас
 
 |Размер|Параметр|Примечание|
 |-|-|-|
-|4 байта|Код разблокировки|Генерируется из unlockKey и сеансового пароля замка, алгоритм описан ниже|
+|4 байта|Код разблокировки|Генерируется из `unlockKey` и сеансового пароля замка так же, как и [в COMM_CHECK_RANDOM]((#%D0%A4%D0%BE%D1%80%D0%BC%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5-%D0%BA%D0%BE%D0%BC%D0%B0%D0%BD%D0%B4%D1%8B-2)|
 |4 байта|unlockDate|текущая метка времени (?), формат описан ниже|
 
-Первые 4 байта - код разблокировки, алгоритм его генерации описан ниже.
-
-Вторые 4 байта - `unlockDate`, некая метка времени. Я не смог понять из кода, какая именно метка здесь используется. Скорее всего, достаточно отправить текущую. 
-
-###### Генерация кода разблокировки
-
-Код разблокировки генерируется из `unlockKey` и сеансового пароля замка. `unlockKey` мы сгенерировали при инициализации замка [на шаге 3](#3-comm_add_admin). Сеансовый пароль мы получили от замка [на предыдущем шаге](#1-comm_check_admin). Код разблокировки генерируется так:
-
-TL;DR: сеансовый пароль конвертируется в число, складывается с `unlockKey`, результат превращается в массив байт.
-
-```java
-String lockPwd = DigitUtil.getUnlockPwd_new(DigitUtil.fourBytesToLong(psFromLock), Long.valueOf(unlockKey).longValue());
-byte[] lockPwdArr = DigitUtil.integerToByteArray(Integer.valueOf(lockPwd).intValue());
-```
-
-Функция `integerToByteArray` приведена [здесь](#конвертация-паролей-в-массив-байт).
-
-Функции `getUnlockPwd_new` и `fourBytesToLong` приведены ниже:
-
-```java
-public static String getUnlockPwd_new(long arg0, long arg2) {
-    return String.valueOf(((int)(arg0 + arg2)));
-}
-
-public static long fourBytesToLong(byte[] arg5) {
-    long res = ((long)(arg5[0] << 24)) & 0xFF000000L | 0L | ((long)(arg5[1] << 16 & 0xFF0000)) | ((long)(arg5[2] << 8 & 0xFF00)) | ((long)(arg5[3] & 0xFF));
-    return res;
-}
-```
+Первые 4 байта - код разблокировки, алгоритм его генерации описан [в COMM_CHECK_RANDOM]((#%D0%A4%D0%BE%D1%80%D0%BC%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5-%D0%BA%D0%BE%D0%BC%D0%B0%D0%BD%D0%B4%D1%8B-2).
 
 **Пример:** Допустим, мы сгенерировали `unlockKey` = "0344382141", и замок прислал нам сеансовый пароль = `[0x00,0x00,0xce,0x2b]`.
 
@@ -649,6 +693,8 @@ public static long fourBytesToLong(byte[] arg5) {
 Затем конвертируем 344434920 в массив байт с помощью `integerToByteArray`, и получаем `[0x14,0x87,0xa8,0xe8]`.
 
 Это и будут первые 4 байта поля data.
+
+Вторые 4 байта - `unlockDate`, некая метка времени. Я не смог понять из кода, какая именно метка здесь используется. Скорее всего, достаточно отправить текущую. 
 
 ###### Генерация метки времени
 
@@ -741,7 +787,7 @@ public static long fourBytesToLong(byte[] arg5) {
 |4 байта|`unlockDate`|текущая метка времени (?), формат такой же, как и у [метки времени в COMM_FUNCTION_LOCK](#генерация-метки-времени)|
 |6 байт|`unlockDate` c поправкой на часовой пояс|
 
-Код разблокировки генерируется из `unlockKey` и сеансового пароля замка так же, как и в [COMM_FUNCTION_LOCK](#генерация-кода-разблокировки)
+Код разблокировки генерируется из `unlockKey` и сеансового пароля замка так же, как и в [в COMM_CHECK_RANDOM]((#%D0%A4%D0%BE%D1%80%D0%BC%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5-%D0%BA%D0%BE%D0%BC%D0%B0%D0%BD%D0%B4%D1%8B-2)
 
 Например, в прошлой команде замок вернул сеансовый пароль `[0x00,0x00,0x7a,0xa7]`. `unlockKey` был `[0x14,0x86,0xda,0xbd]`. Тогда код разблокировки должен получиться `[0x14,0x87,0x55,0x64]`.
 
